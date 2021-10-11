@@ -117,63 +117,74 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"main.js":[function(require,module,exports) {
-var html = document.querySelector("#html");
-var style = document.querySelector("#style"); //同时把这个代码写入html和css当中
+})({"../../../AppData/Local/Yarn/Data/global/node_modules/parcel/src/builtins/bundle-url.js":[function(require,module,exports) {
+var bundleURL = null;
 
-var string = "/* \u4F60\u597D,\u6211\u53EB\u5C0F\u5F90\n * \u63A5\u4E0B\u6765\u6211\u8981\u6F14\u793A\u4E00\u4E0B\u6211\u7684\u524D\u7AEF\u529F\u5E95\n * \u9996\u5148\u6211\u5F97\u51C6\u5907\u4E00\u4E2Adiv\n * */ \n#div1{\n    \n    border: 1px solid red;\n    height: 200px;\n    width: 200px;\n}\n/* \u63A5\u4E0B\u6765\u6211\u628Adiv\u53D8\u6210\u4E00\u4E2A\u516B\u5366\u56FE\n * \u6CE8\u610F\u5566\u5566\u5566\u5566\n * \u9996\u5148\uFF0C\u628Adiv\u53D8\u6210\u4E00\u4E2A\u5706\n */\n#div1{\n    border-radius: 50%;\n    box-shadow: 0 0 3px rgba(0,0,0,0.5);\n    border:none;\n}\n/* \u516B\u5366\u662F\u9634\u9633\u5F62\u6210\u7684\n * \u4E00\u9ED1\u4E00\u767E\n * */\n#div1{\n    background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 50%, rgba(0,0,0,1) 50%, rgba(0,0,0,1) 100%);\n}\n/* \u4E0B\u9762\u52A0\u4E24\u4E2A\u98CE\u706B\u8F6E */\n#div1::before{\n    width: 100px;\n    height: 100px;\n    top: 0;\n    left: 50%;\n    transform: translateX(-50%);\n    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 25%, rgba(0,0,0,1) 25%, rgba(0,0,0,1) 100%);\n    border-radius: 50%;\n}\n#div1::after{\n    width: 100px;\n    height: 100px;\n    bottom: 0;\n    left: 50%;\n    transform: translateX(-50%);\n    background: radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 25%, rgba(255,255,255,1) 25%, rgba(255,255,255,1) 100%);\n    border-radius: 50%;\n}\n";
-var string2 = '';
-var n = 0;
+function getBundleURLCached() {
+  if (!bundleURL) {
+    bundleURL = getBundleURL();
+  }
 
-var step = function step() {
-  setTimeout(function () {
-    // console.log(string[n])
-    // console.log(n) //length不-1，53的时候就undefined了
-    // console.log(string.length) //54
-    //如果是回车 
-    //如果不是回车就照搬
-    // string2 += (string[n] === '\n' ? "<br>" : string[n])
-    if (string[n] === "\n") {
-      string2 += "<br>";
-    } else if (string[n] === " ") {
-      //改缩进 在html里，无数个空格也会被改成一个空格
-      string2 += "&nbsp;";
-    } else {
-      string2 += string[n];
+  return bundleURL;
+}
+
+function getBundleURL() {
+  // Attempt to find the URL of the current script and use that as the base URL
+  try {
+    throw new Error();
+  } catch (err) {
+    var matches = ('' + err.stack).match(/(https?|file|ftp|chrome-extension|moz-extension):\/\/[^)\n]+/g);
+
+    if (matches) {
+      return getBaseURL(matches[0]);
+    }
+  }
+
+  return '/';
+}
+
+function getBaseURL(url) {
+  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)\/[^/]+$/, '$1') + '/';
+}
+
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+},{}],"../../../AppData/Local/Yarn/Data/global/node_modules/parcel/src/builtins/css-loader.js":[function(require,module,exports) {
+var bundle = require('./bundle-url');
+
+function updateLink(link) {
+  var newLink = link.cloneNode();
+
+  newLink.onload = function () {
+    link.remove();
+  };
+
+  newLink.href = link.href.split('?')[0] + '?' + Date.now();
+  link.parentNode.insertBefore(newLink, link.nextSibling);
+}
+
+var cssTimeout = null;
+
+function reloadCSS() {
+  if (cssTimeout) {
+    return;
+  }
+
+  cssTimeout = setTimeout(function () {
+    var links = document.querySelectorAll('link[rel="stylesheet"]');
+
+    for (var i = 0; i < links.length; i++) {
+      if (bundle.getBaseURL(links[i].href) === bundle.getBundleURL()) {
+        updateLink(links[i]);
+      }
     }
 
-    html.innerHTML = string2; // style.innerHTML = string2 直接style里加内容，会把nbsp这些html标签写入css,变通一下用subString()
-
-    style.innerHTML = string.substring(0, n); //直接这样写还是有一些问题，html的文字可能对样式有些影响，所以给文字加注释
-
-    window.scrollTo(0, 99999); //写完就滚一下
-
-    html.scrollTo(0, 99999);
-
-    if (n < string.length - 1) {
-      //如果不是最后一个就继续
-      n += 1;
-      step();
-    } else {
-      console.log('好啦，调完了');
-    }
+    cssTimeout = null;
   }, 50);
-};
+}
 
-step(); // 有个问题，也没如果没有足够大去容纳我们的代码，用户不拖拽就看不到效果，该怎么解决？ window.scrollTo(0,99999);
-// 怎么设置换行,到了页面自动折行 word-break:break-all;
-// 手机页面会出现八卦图被挡的情况，使用媒体查询 
-// 手机很窄但手机很长，可以使用上下结构 
-// style的innerHtml是可以被改写的,如以下代码
-
-/* setTimeout(()=>{
-    style.innerHTML = `
-    body{
-      color:red;
-    }
-    `
-},1000)*/
-},{}],"../../../AppData/Local/Yarn/Data/global/node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+module.exports = reloadCSS;
+},{"./bundle-url":"../../../AppData/Local/Yarn/Data/global/node_modules/parcel/src/builtins/bundle-url.js"}],"../../../AppData/Local/Yarn/Data/global/node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -376,5 +387,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../../AppData/Local/Yarn/Data/global/node_modules/parcel/src/builtins/hmr-runtime.js","main.js"], null)
-//# sourceMappingURL=/main.1f19ae8e.js.map
+},{}]},{},["../../../AppData/Local/Yarn/Data/global/node_modules/parcel/src/builtins/hmr-runtime.js"], null)
+//# sourceMappingURL=/index.js.map
